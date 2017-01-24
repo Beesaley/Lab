@@ -1,11 +1,12 @@
 import requests
 import re
 import tim
+
 m=open('result.html', 'w')
 m.write('<!DOCTYPE html>\n')
 m.write('<html><head><meta http-equiv="Content-Type" content="text/html" charset=UTF-8"></head><body><ul>')
 nw=int(tim.tim())*1000
-r=requests.get('https://api.meetup.com/2/concierge?key=1d406f385b224a6a1ca3022222a7925&sign=true&photo-host=public&country=us&city=Boston&category_id=34&state=MA')
+r=requests.get('https://api.meetup.com/2/open_events?key=54077737e64536329137b12472e4e53&sign=true&photo-host=public&country=us&city=Sacramento&state=ca&page=20')
 zg=re.findall(r'"name":"([\w\ \(\)\:]+)","id":"[\w ]+","time"', r.text)
 ad=re.findall(r'"address_1":"([\w\ \.\&]+)"', r.text)
 tim=re.findall(r'"name":"[\w\ \(\)\:]+","id":"[\w ]+","time":([\d]+)', r.text)

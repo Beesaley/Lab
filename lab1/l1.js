@@ -1,45 +1,74 @@
-const fs = require('fs');
+var request = require("request");
 
-class myHeap {
+class boxContainer {
     constructor() {
-        this.ipArray = {};
+        this.boxes = [];
+        this.counter = 0;
     }
-    addIp (ip) {
 
-        var key = ip.split('.').splice(0,3).join('.');
-
-        if(this.ipArray[key]) {
-            if(this.ipArray[key].indexOf(ip) == -1) {
-                this.ipArray[key].push(ip);
-            }
-        }
-        else  {
-            this.ipArray[key] = [];
-            this.ipArray[key].push(ip);
+    addToBoxes(email) {
+        if (this.boxes.indexOf(email) == -1) {
+            this.boxes.push(email);
         }
     }
 
     print() {
-        for(var key in this.ipArray) {
-            console.log(key + ":");
-            for(var i =0; i< this.ipArray[key].length; i++) {
-                console.log(this.ipArray[key][i]);
-            }
-        }
+        console.log(this.boxes);
     }
 }
 
-fs.readFile('access.log', 'utf8', (err, data) => {
-    if (err) throw err;
+var myBoxes = new boxContainer();
 
-    var heap = new myHeap;
+var parseMyAwesomeHtml = (html) => {
+    var re = /[A-z0-9]+@([A-z0-9][-A-z0-9]+\.)+[A-z]{2,4}/ig;
 
-    var re = /(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)/ig;
-
-    var ips = data.match(re);
-
-    for (var i = 0; i< ips.length; i++) {
-        heap.addIp(ips[i]);
+    var emails = html.match(re);
+    if (emails && emails.length) {
+        for (var i = 0; i < emails.length; i++) {
+            myBoxes.addToBoxes(emails[i]);
+        }
     }
-    heap.print();
-})
+
+    var reHref = /href="(.*?)"/ig;
+
+    var hrefs = html.match(reHref);
+
+    if (hrefs && hrefs.length) {
+        for (var i = 0; i < hrefs.length; i++) {
+
+            var href = hrefs[i];
+            href = href.split('"')[1];
+            if (href.indexOf("mailto") == -1 && href.indexOf("favicon") == -1 && href[0] != '#' && href[0] != '/') {
+                myBoxes.counter = myBoxes.counter + 1;
+                if (myBoxes.counter < 10) {
+                    getOverHere(href)
+                }
+                else if (myBoxes.counter == 10) {
+                    myBoxes.print();
+
+                }
+            }
+
+
+        }
+    }
+
+};
+
+
+function getOverHere(url) {
+    console.log(myBoxes.counter + ' '+url);
+    if (myBoxes.counter < 10) {
+        request(url, (error, response, body) => {
+            if (!error) {
+                parseMyAwesomeHtml(body);
+            } else {
+                console.log(error);
+            }
+        });
+    }
+
+}
+
+
+getOverHere("http://mosigra.ru/page/corporate");

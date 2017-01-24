@@ -1,4 +1,4 @@
-
+import requests
 import re
 import tim
 m=open('result.html', 'w')
